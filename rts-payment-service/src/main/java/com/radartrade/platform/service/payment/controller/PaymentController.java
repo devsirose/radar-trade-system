@@ -23,7 +23,6 @@ public class PaymentController {
     /**
      * Receive request,process subscription then redirect with params to payment gateway
      * @param userId the ID of the user making the payment
-     * @param subsriptionPlanId the ID of the subscription plan being purchased
      * @return ResponseEntity<redirectUrl_with_params></>
      * params according to: https://sandbox.vnpayment.vn/apis/docs/thanh-toan-pay/pay.html#danh-s%C3%A1ch-tham-s%E1%BB%91
      * redirectUrl : https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
