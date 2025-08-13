@@ -1,11 +1,13 @@
 package com.radartrade.platform.service.payment.controller;
 
-import com.radartrade.platform.service.payment.dto.request.SubscriptionRequest;
 import com.radartrade.platform.service.payment.service.impl.PaymentService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
@@ -20,17 +22,36 @@ public class PaymentController {
 
     /**
      * Receive request,process subscription then redirect with params to payment gateway
-     * @param request
+     * @param userId the ID of the user making the payment
+     * @param subsriptionPlanId the ID of the subscription plan being purchased
      * @return ResponseEntity<redirectUrl_with_params></>
      * params according to: https://sandbox.vnpayment.vn/apis/docs/thanh-toan-pay/pay.html#danh-s%C3%A1ch-tham-s%E1%BB%91
      * redirectUrl : https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
      */
-     @PostMapping
-     public ResponseEntity<?> createPayment(@RequestBody SubscriptionRequest request) {
-         HttpHeaders headers = new HttpHeaders();
-         headers.add("Location", paymentService.createPaymentUrl(request.getUserId(), request.getSubsriptionPlanId()));
-         return new ResponseEntity<>(headers, HttpStatus.CREATED);
+     @GetMapping
+     public ResponseEntity<Void> initiatePayment(@RequestParam String userId,
+                                                 @RequestParam String subsriptionPlanId) {
+         String redirectUrl = paymentService.createPaymentUrl(
+                 userId,
+                 subsriptionPlanId
+         );
+
+         return ResponseEntity
+                 .status(HttpStatus.FOUND)
+                 .header(HttpHeaders.LOCATION, redirectUrl)
+                 .build();
      }
+
+     @GetMapping("/return-url")
+     public ResponseEntity<Void> returnUrl(@RequestParam Map<String, String> vnpParams) {
+         // Process the return URL parameters from the payment gateway
+         // This is notified used to confirm the payment status
+         // You are not allowed to update the subscription status here
+         // You should validate the parameters and check the payment status
+         // For now, we just return OK
+         return ResponseEntity.ok().build();
+     }
+
 
     /**
      * Instant Payment Notification (IPN) callback endpoint (whether success or failure)
@@ -43,7 +64,7 @@ public class PaymentController {
      * @return
      */
 
-    @GetMapping
+    @GetMapping("/callbackIPN")
     public ResponseEntity<?> callbackIPN(@RequestParam Map<String, String> vnpParams) {
 
         return ResponseEntity.ok().build();
