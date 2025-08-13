@@ -26,7 +26,7 @@ public class PaymentService {
      * @param subscriptionPlanId
      * @return
      */
-    public String createPaymentUrl(String userId, String subscriptionPlanId) {
+    public String createPaymentUrl(String userId) {
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", "2.1.0");
         vnp_Params.put("vnp_Command", "pay");

@@ -29,12 +29,8 @@ public class PaymentController {
      * redirectUrl : https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
      */
      @GetMapping
-     public ResponseEntity<Void> initiatePayment(@RequestParam String userId,
-                                                 @RequestParam String subsriptionPlanId) {
-         String redirectUrl = paymentService.createPaymentUrl(
-                 userId,
-                 subsriptionPlanId
-         );
+     public ResponseEntity<Void> initiatePayment(@RequestParam String userId) {
+         String redirectUrl = paymentService.createPaymentUrl(userId);
 
          return ResponseEntity
                  .status(HttpStatus.FOUND)
