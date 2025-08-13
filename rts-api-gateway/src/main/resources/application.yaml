@@ -60,9 +60,9 @@ token:
     provider:
       keycloak:
         endpoint: http://localhost:7080/realms/master/protocol/openid-connect/token
-        client-id: rts-call-center-ac
-        client-secret: tjkVejU6tAm3vZDJYDBABjvPEwZH0nxs
-        redirect-uri: http://localhost:8080/callback
+        client-id: financial-ai-frontend
+        client-secret: XopDn7QXZmgC0DVk1Lu1CLsBS1lao5er
+        redirect-uri: http://localhost:5173/auth/callback
         login-url: http://localhost:7080/realms/master/protocol/openid-connect/auth
         logout-url: http://localhost:7080/realms/master/protocol/openid-connect/logout
 ---
@@ -85,8 +85,8 @@ token:
     provider:
       keycloak:
         endpoint: http://auth-server:7080/realms/master/protocol/openid-connect/token
-        client-id: rts-call-center-ac
-        client-secret: tjkVejU6tAm3vZDJYDBABjvPEwZH0nxs
-        redirect-uri: http://auth-server:8080/callback
+        client-id: financial-ai-frontend
+        client-secret: XopDn7QXZmgC0DVk1Lu1CLsBS1lao5er
+        redirect-uri: http://localhost:5173/auth/callback
         login-url: http://auth-server:7080/realms/master/protocol/openid-connect/auth
         logout-url: http://auth-server:7080/realms/master/protocol/openid-connect/logout

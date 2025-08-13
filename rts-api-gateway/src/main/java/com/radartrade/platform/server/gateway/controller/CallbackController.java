@@ -20,11 +20,11 @@ public class CallbackController {
     /**
      * @fixme: check state == state stored in session follow oauth2 flow aspect of security
      * @param code
-     * @param state
+
      * @return
      */
     @GetMapping("/callback")
-    public ResponseEntity<ResponseToken> callback(@RequestParam String code, @RequestParam String state) {
+    public ResponseEntity<ResponseToken> callback(@RequestParam String code) {
         return ResponseEntity.ok(
                 exchangeTokenService.exchangeToken(code)
         );

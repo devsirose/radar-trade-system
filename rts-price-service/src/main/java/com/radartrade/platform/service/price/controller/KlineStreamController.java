@@ -33,14 +33,7 @@ public class KlineStreamController {
                 .take(limit);
     }
 
-    // =================== ENDPOINT MỚI ĐÃ THÊM VÀO ===================
-    /**
-     * Cung cấp một luồng dữ liệu kline thời gian thực và không bao giờ kết thúc.
-     * Endpoint này sẽ được frontend gọi để nhận các cập nhật liên tục.
-     * @param symbol Cặp giao dịch, ví dụ: "BTCUSDT"
-     * @param interval Khung thời gian, ví dụ: "1m"
-     * @return một Flux<KlineUpdate> liên tục.
-     */
+
     @GetMapping(value = "/stream/live", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
     public Flux<KlineUpdate> streamLiveKlineUpdate(@RequestParam String symbol,
                                                    @RequestParam String interval) {

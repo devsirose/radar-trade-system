@@ -24,6 +24,10 @@ public class KeycloakExchangeTokenService implements ExchangeTokenService {
     @Value("${token.exchange.provider.keycloak.client-id}")
     private String CLIENT_ID;
 
+    // THÊM VÀO: Inject redirect-uri từ file cấu hình
+    @Value("${token.exchange.provider.keycloak.redirect-uri}")
+    private String REDIRECT_URI;
+
     @PostConstruct
     public void onConnect() {
         restClient = RestClient.create(tokenEndpoint);
@@ -42,13 +46,13 @@ public class KeycloakExchangeTokenService implements ExchangeTokenService {
                 .body(Map.class);
 
         return buildReponseToken(tokenResponse);
-
     }
 
     @Override
     public ResponseToken refreshToken(String refreshToken) {
         MultiValueMap<String, String> body = buildBaseRequestBody();
         body.add("refresh_token", refreshToken);
+        body.set("grant_type", "refresh_token"); // Sửa grant_type cho refresh token
 
         Map<String, String> tokenResponse = restClient
                 .post()
@@ -74,8 +78,9 @@ public class KeycloakExchangeTokenService implements ExchangeTokenService {
         formData.add("grant_type", "authorization_code");
         formData.add("client_id", CLIENT_ID);
         formData.add("client_secret", CLIENT_SECRET);
-        formData.add("redirect_uri", "http://localhost:8080/callback");
-        
+        // THAY ĐỔI: Sử dụng giá trị redirect-uri đã được inject
+        formData.add("redirect_uri", REDIRECT_URI);
+
         return formData;
     }
 }
