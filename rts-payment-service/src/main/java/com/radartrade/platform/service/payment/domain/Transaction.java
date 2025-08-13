@@ -29,9 +29,6 @@ public class Transaction {
     @JoinColumn(name = "subscription_id", nullable = false)
     private Subscription subscription;
 
-    @ManyToOne
-    @JoinColumn(name = "payment_method_id", nullable = false)
-    private PaymentMethod paymentMethod;
 
     @Column(nullable = false)
     private BigDecimal amount;
