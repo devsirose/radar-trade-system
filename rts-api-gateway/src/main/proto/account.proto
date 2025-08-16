@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package pb;
-
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/devsirose/simplebank/pb";
+option java_multiple_files = true;
+option java_outer_classname = "AccountProto";
+option java_package = "com.radartrade.platform.server.gateway.grpc";
 
 message Account {
     string owner = 1;
@@ -31,3 +31,10 @@ message GetAccountByIdResponse {
     Account account = 1;
 }
 
+message GetAccountByOwnerRequest {
+    string owner = 1;
+}
+
+message GetAccountByOwnerResponse {
+    repeated Account account = 1;
+}

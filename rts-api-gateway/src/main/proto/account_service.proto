@@ -1,17 +1,21 @@
-syntax = "proto3";
-
-package pb;
-
 import "account.proto";
 import "google/api/annotations.proto";
-
-option go_package = "github.com/devsirose/simplebank/pb";
 
 service AccountService {
     rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse) {
       option (google.api.http) = {
           post: "/api/v1/accounts"
           body: "*"
+      };
+    }
+    rpc GetAccountById (GetAccountByIdRequest) returns (GetAccountByIdResponse) {
+      option (google.api.http) = {
+          get: "/api/v1/accounts/{id}"
+      };
+    }
+    rpc GetAccountByOwner (GetAccountByOwnerRequest) returns (GetAccountByOwnerResponse) {
+      option (google.api.http) = {
+        get: "/api/v1/accounts/owner/{owner}"
       };
     }
 }
