@@ -2,6 +2,8 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
+package pb;
+
 option java_multiple_files = true;
 option java_outer_classname = "AccountProto";
 option java_package = "com.radartrade.platform.server.gateway.grpc";

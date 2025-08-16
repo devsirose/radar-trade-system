@@ -65,6 +65,11 @@ token:
         redirect-uri: http://localhost:8080/callback
         login-url: http://localhost:7080/realms/master/protocol/openid-connect/auth
         logout-url: http://localhost:7080/realms/master/protocol/openid-connect/logout
+
+grpc:
+  account-service:
+    host: localhost
+    port: 9090
 ---
 spring:
   config:
@@ -90,3 +95,8 @@ token:
         redirect-uri: http://auth-server:8080/callback
         login-url: http://auth-server:7080/realms/master/protocol/openid-connect/auth
         logout-url: http://auth-server:7080/realms/master/protocol/openid-connect/logout
+
+grpc:
+  account-service:
+    host: account-service
+    port: 9090

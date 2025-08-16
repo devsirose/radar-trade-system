@@ -1,5 +1,11 @@
+syntax = "proto3";
+
 import "account.proto";
 import "google/api/annotations.proto";
+
+package pb;
+
+option java_package = "com.radartrade.platform.server.gateway.grpc";
 
 service AccountService {
     rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse) {
