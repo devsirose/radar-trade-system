@@ -23,7 +23,7 @@
 	</developers>
 	<modules>
 		<module>rts-common</module>
-		<module>rts-account-service</module>
+<!--		<module>rts-account-service</module>-->
 		<module>rts-payment-service</module>
 		<module>rts-api-gateway</module>
 		<module>rts-discovery-server</module>
