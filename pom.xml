@@ -57,7 +57,12 @@
 		<redisson.version>3.47.0</redisson.version>
 		<reactor-test.version>3.4.7</reactor-test.version>
 		<registry-prometheus.version>1.14.8</registry-prometheus.version>
-
+        <grpc.version>1.72.0</grpc.version>
+        <protoc.version>3.25.5</protoc.version>
+        <tomcat.annotations.version>6.0.53</tomcat.annotations.version>
+        <os.maven.plugin.version>1.7.1</os.maven.plugin.version>
+        <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
+        <surefire.version>3.5.2</surefire.version>
 		<!--Deployment Environment-->
 		<docker.image.prefix>devops22clc</docker.image.prefix>
 		<docker.image.exposed.port>9090</docker.image.exposed.port>
