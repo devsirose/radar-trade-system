@@ -16,7 +16,7 @@ redis:
 docker-build:
 	docker build -f Dockerfile --build-arg ARTIFACT_NAME=rts-discovery-server --build-arg VERSION=latest   --build-arg EXPOSED_PORT=8761 --platform linux/amd64 --push -t devops22clc/rts-discovery-server rts-discovery-server  && \
 	docker build -f Dockerfile --build-arg ARTIFACT_NAME=rts-api-gateway --build-arg VERSION=latest   --build-arg EXPOSED_PORT=8080 --platform linux/amd64 --push -t devops22clc/rts-api-gateway rts-api-gateway  && \
-#	docker build -f Dockerfile --build-arg ARTIFACT_NAME=rts-auth-service --build-arg VERSION=latest  --build-arg EXPOSED_PORT=8081 --platform linux/amd64 --push -t devops22clc/rts-auth-service rts-auth-service && \
+	docker build -f Dockerfile --build-arg ARTIFACT_NAME=rts-user-service --build-arg VERSION=latest  --build-arg EXPOSED_PORT=8087 --platform linux/amd64 --push -t devops22clc/rts-user-service rts-user-service && \
 	docker build -f Dockerfile --build-arg ARTIFACT_NAME=rts-account-service --build-arg VERSION=latest --build-arg EXPOSED_PORT=8085 --platform linux/amd64 --push -t devops22clc/rts-account-service rts-account-service && \
 	docker build -f Dockerfile --build-arg ARTIFACT_NAME=rts-price-service --build-arg VERSION=latest  --build-arg EXPOSED_PORT=8083 --platform linux/amd64 --push -t devops22clc/rts-price-service rts-price-service && \
 	docker build -f Dockerfile --build-arg ARTIFACT_NAME=rts-payment-service --build-arg VERSION=latest  --build-arg EXPOSED_PORT=8084 --platform linux/amd64 --push -t devops22clc/rts-payment-service rts-payment-service && \

@@ -27,7 +27,7 @@ services:
       - ./rts-exchange-gateway-processor/src/main/resources/db/schema/:/docker-entrypoint-initdb.d/
       - price_service_db_data:/var/lib/postgresql/data
 
-  account-db:
+  account-service-db:
     image: postgres:15
     container_name: account-service-db
     environment:
@@ -183,7 +183,22 @@ services:
       - discovery-server
       - api-gateway
     volumes:
-      - ./rts-api-gateway/src/main/resources/auth-server-db/h2/:/opt/keycloak/data/h2/
+      - ./rts-user-service/src/main/resources/auth-server-db/h2/:/opt/keycloak/data/h2/
+  user-service:
+    image: devops22clc/rts-user-service
+    container_name: user-service
+    ports:
+      - 8087:8087
+    depends_on:
+      - discovery-server
+      - api-gateway
+      - auth-server
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
   ml-inference-service:
     image: devops22clc/rts-ml-inference-service
     container_name: ml-inference-service
