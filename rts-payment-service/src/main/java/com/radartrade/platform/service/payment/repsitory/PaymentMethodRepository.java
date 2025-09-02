@@ -11,8 +11,8 @@ import java.util.UUID;
 
 @Repository
 public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, UUID> {
-    List<PaymentMethod> findByUserId(UUID userId);
+    List<PaymentMethod> findByUser(UUID userId);
 
-    Optional<PaymentMethod> findByUserIdAndType(UUID userId, PaymentMethodType type);
+    Optional<PaymentMethod> findByUserAndType(UUID userId, PaymentMethodType type);
 }
 

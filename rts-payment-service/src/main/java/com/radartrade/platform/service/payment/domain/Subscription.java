@@ -28,6 +28,8 @@ public class Subscription {
     private SubscriptionPlan plan;
 
     @Enumerated(EnumType.STRING)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NAMED_ENUM)
+    @Column(name = "status", columnDefinition = "subscription_status", nullable = false)
     private SubscriptionStatus status = SubscriptionStatus.ACTIVE;
 
     private Instant currentPeriodStart;

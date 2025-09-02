@@ -1,9 +1,9 @@
-package com.radartrade.platform.server.gateway.service.client;
+package com.radartrade.platform.server.gateway.service;
 
 import com.radartrade.platform.server.gateway.dto.response.ResponseToken;
-import com.radartrade.platform.server.gateway.service.ExchangeTokenService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -23,8 +23,6 @@ public class KeycloakExchangeTokenService implements ExchangeTokenService {
     private String CLIENT_SECRET;
     @Value("${token.exchange.provider.keycloak.client-id}")
     private String CLIENT_ID;
-
-    // THÊM VÀO: Inject redirect-uri từ file cấu hình
     @Value("${token.exchange.provider.keycloak.redirect-uri}")
     private String REDIRECT_URI;
 
@@ -34,7 +32,11 @@ public class KeycloakExchangeTokenService implements ExchangeTokenService {
     }
 
     public ResponseToken exchangeToken(String code) {
-        MultiValueMap<String, String> body = buildBaseRequestBody();
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "authorization_code");
+        body.add("client_id", CLIENT_ID);
+        body.add("client_secret", CLIENT_SECRET);
+        body.add("redirect_uri", REDIRECT_URI);
         body.add("code", code);
 
         Map<String, String> tokenResponse = restClient
@@ -43,16 +45,18 @@ public class KeycloakExchangeTokenService implements ExchangeTokenService {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(body)
                 .retrieve()
-                .body(Map.class);
+                .body(new ParameterizedTypeReference<>() {});
 
         return buildReponseToken(tokenResponse);
     }
 
     @Override
     public ResponseToken refreshToken(String refreshToken) {
-        MultiValueMap<String, String> body = buildBaseRequestBody();
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "refresh_token");
+        body.add("client_id", CLIENT_ID);
+        body.add("client_secret", CLIENT_SECRET);
         body.add("refresh_token", refreshToken);
-        body.set("grant_type", "refresh_token"); // Sửa grant_type cho refresh token
 
         Map<String, String> tokenResponse = restClient
                 .post()
@@ -60,27 +64,16 @@ public class KeycloakExchangeTokenService implements ExchangeTokenService {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(body)
                 .retrieve()
-                .body(Map.class);
+                .body(new ParameterizedTypeReference<>() {});
 
         return buildReponseToken(tokenResponse);
     }
 
     private ResponseToken buildReponseToken(Map<String, String> tokenResponse) {
-        return ResponseToken.builder()
-                .token(tokenResponse.get("access_token"))
-                .refreshToken(tokenResponse.get("refresh_token"))
-                .idToken(tokenResponse.get("id_token"))
-                .build();
-    }
-
-    private MultiValueMap<String, String> buildBaseRequestBody() {
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("grant_type", "authorization_code");
-        formData.add("client_id", CLIENT_ID);
-        formData.add("client_secret", CLIENT_SECRET);
-        // THAY ĐỔI: Sử dụng giá trị redirect-uri đã được inject
-        formData.add("redirect_uri", REDIRECT_URI);
-
-        return formData;
+        return new ResponseToken(
+                tokenResponse.get("access_token"),
+                tokenResponse.get("refresh_token"),
+                tokenResponse.get("id_token")
+        );
     }
 }

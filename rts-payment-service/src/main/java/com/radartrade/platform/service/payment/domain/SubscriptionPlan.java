@@ -34,11 +34,13 @@ public class SubscriptionPlan {
     private String currency;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "billing_cycle_type")
     private BillingCycleType billingCycle;
 
     private Integer trialDays = 0;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "plan_status")
     private PlanStatus status = PlanStatus.ACTIVE;
 
     private Instant createdAt = Instant.now();

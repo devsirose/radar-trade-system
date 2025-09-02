@@ -18,5 +18,5 @@ import java.io.Serializable;
  *
  * @author [Your Name]
  */
-@Builder
+
 public record ResponseToken(String token, String refreshToken, String idToken) implements Serializable {}

@@ -1,4 +1,4 @@
-package com.radartrade.platform.server.gateway.service.client;
+package com.radartrade.platform.server.gateway.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +25,7 @@ public class KeycloakLogoutService {
                 .toBodilessEntity()
                 .getStatusCode();
 
-        log.info("Logout request response with status: {}", status);
+//        log.info("Logout request response with status: {}", status);
     }
 
 }

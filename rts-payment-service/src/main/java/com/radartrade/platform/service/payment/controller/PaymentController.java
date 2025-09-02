@@ -1,17 +1,19 @@
 package com.radartrade.platform.service.payment.controller;
 
-import com.radartrade.platform.service.payment.dto.request.SubscriptionRequest;
 import com.radartrade.platform.service.payment.service.impl.PaymentService;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/payment")
 public class PaymentController {
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentController.class);
     private final PaymentService paymentService;
 
     public PaymentController(PaymentService paymentService) {
@@ -19,33 +21,44 @@ public class PaymentController {
     }
 
     /**
-     * Receive request,process subscription then redirect with params to payment gateway
-     * @param request
-     * @return ResponseEntity<redirectUrl_with_params></>
-     * params according to: https://sandbox.vnpayment.vn/apis/docs/thanh-toan-pay/pay.html#danh-s%C3%A1ch-tham-s%E1%BB%91
-     * redirectUrl : https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+     * FE gọi để tạo URL thanh toán VNPay.
+     * Gọi: GET /api/v1/payment/create?userId=...&subscriptionPlanId=...
+     * Backend sẽ trả về 302 + Location để redirect sang VNPay.
      */
-     @PostMapping
-     public ResponseEntity<?> createPayment(@RequestBody SubscriptionRequest request) {
-         HttpHeaders headers = new HttpHeaders();
-         headers.add("Location", paymentService.createPaymentUrl(request.getUserId(), request.getSubsriptionPlanId()));
-         return new ResponseEntity<>(headers, HttpStatus.CREATED);
-     }
+    @GetMapping("/create")
+    public ResponseEntity<Void> createPayment(
+            @RequestParam String userId,
+            @RequestParam String subscriptionPlanId) {
+
+        String paymentUrl = paymentService.createPaymentUrl(userId, subscriptionPlanId);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(paymentUrl))
+                .build();
+    }
 
     /**
-     * Instant Payment Notification (IPN) callback endpoint (whether success or failure)
-     * This endpoint is called by the payment gateway to notify about the payment status.
-     * It should handle the notification and update the subscription status accordingly.
-     * @param vnpParams according to (https://sandbox.vnpayment.vn/apis/docs/thanh-toan-pay/pay.html#danh-s%C3%A1ch-tham-s%E1%BB%91-1)
-     * requirement: IPN URL must have SSL certificate (https) and domain must be registered with the payment gateway.
-     * action: update subscription status in database, send notification to user, etc.
-     * Note: This endpoint should be secured and validate the request to ensure it comes from the payment gateway.
-     * @return
+     * IPN endpoint – VNPay gọi tới (GET với query params).
+     * Trả về JSON {"RspCode":"00","Message":"Confirm Success"} nếu hợp lệ.
      */
+    @GetMapping(value = "/ipn", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, String>> ipn(@RequestParam Map<String, String> vnpParams) {
+        log.info("[VNPay IPN] params = {}", vnpParams);
+        Map<String, String> response = paymentService.handleIPNCallback(vnpParams);
+        return ResponseEntity.ok(response);
+    }
 
-    @GetMapping
-    public ResponseEntity<?> callbackIPN(@RequestParam Map<String, String> vnpParams) {
-
-        return ResponseEntity.ok().build();
+    /**
+     * Return URL – người dùng được VNPay redirect về sau khi thanh toán.
+     * FE có thể đọc code từ query string để hiển thị kết quả.
+     */
+    @GetMapping("/return")
+    public ResponseEntity<Void> returnUrl(@RequestParam Map<String, String> vnpParams) {
+        log.info("[VNPay RETURN] params = {}", vnpParams);
+        String code = vnpParams.get("vnp_ResponseCode");
+        // Redirect về FE kèm trạng thái
+        String frontendUrl = "https://your-frontend.example.com/payment-result?code=" + code;
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(frontendUrl))
+                .build();
     }
 }

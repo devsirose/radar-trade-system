@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -20,7 +22,12 @@ public class PaymentMethod {
     @GeneratedValue
     private UUID id;
 
+    @Column(name = "user_id", nullable = false)
+    private UUID user;
+
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "payment_method_type")
     private PaymentMethodType type;
 
     private String provider;

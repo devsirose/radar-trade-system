@@ -44,6 +44,9 @@ public class ApiGatewayConfig {
                 .route("ml-inference-service", r -> r
                         .path("/api/v1/ml-inference/**")
                         .uri("lb://ml-inference-service"))
+                .route("payment-service", r -> r
+                        .path("/api/v1/payment/**")
+                        .uri("lb://payment-service"))
                 .build();
     }
 

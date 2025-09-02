@@ -2,7 +2,7 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: jdbc:postgresql://localhost:5430/payment-service-db?sslmode=disable
+    url: jdbc:postgresql://localhost:5430/payment-service?sslmode=disable
     password: mysecretpassword
     username: root
     driver-class-name: org.postgresql.Driver
@@ -12,6 +12,22 @@ spring:
       idle-timeout: 600000
       connection-timeout: 30000
       pool-name: HikariPool
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        type:
+          preferred_enum_type: pgsql
+    show-sql: true
+
+  sql:
+    init:
+      mode: always
+      platform: postgres
+
 server:
   port: 8084
 
@@ -49,15 +65,26 @@ eureka:
     service-url:
       default-zone: http://localhost:8761/eureka/
 
-payment:
-  provider:
-    version: 2.1.0
-    sandbox-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-    secret-key: 2XPQRXXXPH7EW3TLE2H15GM6KNDCN6L4
-    terminal-id: ISED9RTW
-    currency-code: VND
-    order-type:
-    return-url: https://domain.vn/VnPayReturn  # example
+vnpay:
+  tmn-code: "KJKB95LB"
+  hash-secret: "VSF1LDNVK1RWT6HRN6Q93HFOTGTFPYV4"
+  url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+  return-url: "http://localhost:5173/payment/callback"
+keycloak:
+  auth-server-url: http://localhost:7080
+  realm: master
+  admin:
+    client-id: admin-cli
+    client-secret: 7UDgUTaPN6mRMj1JwHaV4rUPkNgoHw3c
+    username: admin
+    password: admin
+  vip-role-name: vip
+
+frontend:
+  url: "http://localhost:5173"
+logging:
+  level:
+    org.springframework.jdbc: DEBUG
 ---
 
 spring:

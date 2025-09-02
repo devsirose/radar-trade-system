@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class SubscriptionRequest {
     private String userId;
-    private String subsriptionPlanId;
+    private String subscriptionPlanId;
 }

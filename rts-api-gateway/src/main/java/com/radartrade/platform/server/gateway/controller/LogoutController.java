@@ -1,6 +1,6 @@
 package com.radartrade.platform.server.gateway.controller;
 
-import com.radartrade.platform.server.gateway.service.client.KeycloakLogoutService;
+import com.radartrade.platform.server.gateway.service.KeycloakLogoutService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
