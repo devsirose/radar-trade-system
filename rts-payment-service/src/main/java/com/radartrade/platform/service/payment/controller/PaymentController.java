@@ -1,6 +1,7 @@
 package com.radartrade.platform.service.payment.controller;
 
-import com.radartrade.platform.service.payment.service.impl.PaymentService;
+import com.radartrade.platform.service.payment.service.PaymentService;
+import com.radartrade.platform.service.payment.service.impl.PaymentServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -16,7 +17,7 @@ public class PaymentController {
     private static final Logger log = LoggerFactory.getLogger(PaymentController.class);
     private final PaymentService paymentService;
 
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentServiceImpl paymentService) {
         this.paymentService = paymentService;
     }
 

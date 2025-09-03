@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 
 import java.time.Instant;
@@ -21,7 +22,6 @@ public class KlineRestConsumer {
 
     @Value("${exchange.api.rest.base-url}")
     private String BASE_URL;
-
     private static final String KLINE_URI = "/api/v3/klines";
 
     private RestClient client;
@@ -65,6 +65,25 @@ public class KlineRestConsumer {
             log.error("Failed to fetch Kline data from exchange: {}", e.getMessage(), e);
             return List.of(); // fallback rỗng
         }
+    }
+    public List<KlineUpdate> getHistoricalKlines(String symbol, String interval, Long startTime, Long endTime, Integer limit) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/api/v3/klines")
+                .queryParam("symbol", symbol)
+                .queryParam("interval", interval)
+                .queryParam("limit", limit);
+
+        if (startTime != null) {
+            builder.queryParam("startTime", startTime);
+        }
+        if (endTime != null) {
+            builder.queryParam("endTime", endTime);
+        }
+
+        String uri = builder.toUriString();
+        log.info("Requesting historical klines from Binance API: {}", uri);
+
+        String result = client.get().uri(uri).retrieve().body(String.class);
+        return parseListKlineUpdate(result, symbol, interval);
     }
 
     private List<KlineUpdate> parseListKlineUpdate(String response, String symbol, String interval) {

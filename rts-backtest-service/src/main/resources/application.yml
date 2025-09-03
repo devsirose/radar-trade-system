@@ -1,8 +1,27 @@
+server:
+  port: 8086
+
 spring:
   application:
     name: backtest-service
-server:
-  port: 8086
+  servlet:
+    multipart:
+      max-file-size: 50MB       # Giới hạn dung lượng 1 file
+      max-request-size: 50MB
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:7080/realms/master/protocol/openid-connect/certs
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      default-zone: http://localhost:8761/eureka/
 
 management:
   endpoints:
@@ -18,32 +37,24 @@ management:
     health:
       probes:
         enabled: true
-    shutdown:
-      access: unrestricted
-  info:
-    env:
-      enabled: true
 
-endpoint:
-  shutdown:
-    enabled: true
-
-eureka:
-  instance:
-    prefer-ip-address: true
-  # standalone mode
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      default-zone: http://localhost:8761/eureka/
+# ===== THÊM MỚI: Cấu hình tùy chỉnh cho ứng dụng =====
+app:
+  # URL của price-service, được gọi thông qua API Gateway
+  price-service-url: "http://localhost:8080/api/v1/price"
+  model-storage-path: "./models"
 
 ---
 spring:
   config:
     activate:
       on-profile: docker
+
 eureka:
   client:
     serviceUrl:
       defaultZone: http://discovery-server:8761/eureka/
+
+app:
+  price-service-url: "http://api-gateway:8080/api/v1/price"
+  model-storage-path: "/app/models"

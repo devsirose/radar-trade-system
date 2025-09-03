@@ -47,6 +47,9 @@ public class ApiGatewayConfig {
                 .route("payment-service", r -> r
                         .path("/api/v1/payment/**")
                         .uri("lb://payment-service"))
+                .route("backtest-service", r -> r
+                        .path("/api/v1/backtest/**")
+                        .uri("lb://backtest-service"))
                 .build();
     }
 

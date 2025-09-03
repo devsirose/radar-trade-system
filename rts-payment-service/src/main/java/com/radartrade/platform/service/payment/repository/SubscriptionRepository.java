@@ -1,4 +1,4 @@
-package com.radartrade.platform.service.payment.repsitory;
+package com.radartrade.platform.service.payment.repository;
 
 import com.radartrade.platform.service.payment.domain.Subscription;
 import com.radartrade.platform.service.payment.domain.valueobject.SubscriptionStatus;

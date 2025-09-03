@@ -1,5 +1,7 @@
 package com.radartrade.platform.service.payment.service.impl;
 
+
+
 import com.radartrade.platform.service.payment.domain.Subscription;
 import com.radartrade.platform.service.payment.domain.SubscriptionPlan;
 import com.radartrade.platform.service.payment.domain.Transaction;
@@ -7,10 +9,13 @@ import com.radartrade.platform.service.payment.domain.User;
 import com.radartrade.platform.service.payment.domain.valueobject.SubscriptionStatus;
 import com.radartrade.platform.service.payment.domain.valueobject.TransactionStatus;
 import com.radartrade.platform.service.payment.domain.valueobject.TransactionType;
-import com.radartrade.platform.service.payment.repsitory.SubscriptionPlanRepository;
-import com.radartrade.platform.service.payment.repsitory.SubscriptionRepository;
-import com.radartrade.platform.service.payment.repsitory.TransactionRepository;
-import com.radartrade.platform.service.payment.repsitory.UserRepository;
+import com.radartrade.platform.service.payment.repository.SubscriptionPlanRepository;
+import com.radartrade.platform.service.payment.repository.SubscriptionRepository;
+import com.radartrade.platform.service.payment.repository.TransactionRepository;
+import com.radartrade.platform.service.payment.repository.UserRepository;
+
+
+import com.radartrade.platform.service.payment.service.PaymentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,10 +34,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
-public class PaymentService {
+public class PaymentServiceImpl implements PaymentService {
 
-    // THÊM: Logger để theo dõi lỗi tốt hơn
-    private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
+    private static final Logger log = LoggerFactory.getLogger(PaymentServiceImpl.class);
 
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionPlanRepository subscriptionPlanRepository;
@@ -40,23 +44,16 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final KeycloakAdminService keycloakAdminService;
 
-    @Value("${vnpay.tmn-code}")
-    private String vnp_TmnCode;
+    @Value("${vnpay.tmn-code}")    private String vnp_TmnCode;
+    @Value("${vnpay.hash-secret}") private String vnp_HashSecret;
+    @Value("${vnpay.url}")         private String vnp_Url;
+    @Value("${vnpay.return-url}")  private String vnp_ReturnUrl;
 
-    @Value("${vnpay.hash-secret}")
-    private String vnp_HashSecret;
-
-    @Value("${vnpay.url}")
-    private String vnp_Url;
-
-    @Value("${vnpay.return-url}")
-    private String vnp_ReturnUrl;
-
-    public PaymentService(SubscriptionRepository subscriptionRepository,
-                          SubscriptionPlanRepository subscriptionPlanRepository,
-                          TransactionRepository transactionRepository,
-                          UserRepository userRepository,
-                          KeycloakAdminService keycloakAdminService) {
+    public PaymentServiceImpl(SubscriptionRepository subscriptionRepository,
+                              SubscriptionPlanRepository subscriptionPlanRepository,
+                              TransactionRepository transactionRepository,
+                              UserRepository userRepository,
+                              KeycloakAdminService keycloakAdminService) {
         this.subscriptionRepository = subscriptionRepository;
         this.subscriptionPlanRepository = subscriptionPlanRepository;
         this.transactionRepository = transactionRepository;
@@ -64,14 +61,17 @@ public class PaymentService {
         this.keycloakAdminService = keycloakAdminService;
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public String createPaymentUrl(String userId, String subscriptionPlanId) {
-        // ... (phần code này đã đúng, không cần thay đổi)
         UUID uid = UUID.fromString(userId);
         UUID planId = UUID.fromString(subscriptionPlanId);
+
         SubscriptionPlan plan = subscriptionPlanRepository.findById(planId)
                 .orElseThrow(() -> new RuntimeException("Subscription plan not found: " + planId));
+
         upsertUserIfMissing(uid);
+
         Subscription subscription = new Subscription();
         subscription.setUser(uid);
         subscription.setPlan(plan);
@@ -79,6 +79,7 @@ public class PaymentService {
         subscription.setCreatedAt(Instant.now());
         subscription.setUpdatedAt(Instant.now());
         subscription = subscriptionRepository.save(subscription);
+
         Transaction transaction = new Transaction();
         transaction.setUser(uid);
         transaction.setSubscription(subscription);
@@ -88,7 +89,9 @@ public class PaymentService {
         transaction.setStatus(TransactionStatus.PENDING);
         transaction.setCreatedAt(Instant.now());
         transaction = transactionRepository.save(transaction);
+
         String vnp_TxnRef = transaction.getId().toString();
+
         try {
             String vnp_Version = "2.1.0";
             String vnp_Command = "pay";
@@ -96,6 +99,7 @@ public class PaymentService {
             String orderType = "other";
             String vnp_IpAddr = "127.0.0.1";
             BigDecimal amount = plan.getPrice().multiply(new BigDecimal("100"));
+
             Map<String, String> vnp_Params = new HashMap<>();
             vnp_Params.put("vnp_Version", vnp_Version);
             vnp_Params.put("vnp_Command", vnp_Command);
@@ -108,6 +112,7 @@ public class PaymentService {
             vnp_Params.put("vnp_Locale", "vn");
             vnp_Params.put("vnp_ReturnUrl", vnp_ReturnUrl);
             vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+
             Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
             String vnp_CreateDate = formatter.format(cld.getTime());
@@ -115,24 +120,32 @@ public class PaymentService {
             cld.add(Calendar.MINUTE, 15);
             String vnp_ExpireDate = formatter.format(cld.getTime());
             vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+
             List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
             Collections.sort(fieldNames);
+
             StringBuilder hashData = new StringBuilder();
             StringBuilder query = new StringBuilder();
+
             for (Iterator<String> itr = fieldNames.iterator(); itr.hasNext();) {
                 String fieldName = itr.next();
                 String fieldValue = vnp_Params.get(fieldName);
                 if (fieldValue != null && !fieldValue.isEmpty()) {
-                    hashData.append(fieldName).append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
-                    query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString())).append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
+                    hashData.append(fieldName).append('=')
+                            .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()))
+                            .append('=')
+                            .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
                     if (itr.hasNext()) {
                         hashData.append('&');
                         query.append('&');
                     }
                 }
             }
+
             String vnp_SecureHash = hmacSHA512(vnp_HashSecret, hashData.toString());
             String queryUrl = query + "&vnp_SecureHash=" + vnp_SecureHash;
+
             return vnp_Url + "?" + queryUrl;
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Failed to create payment URL", e);
@@ -140,7 +153,6 @@ public class PaymentService {
     }
 
     private void upsertUserIfMissing(UUID userId) {
-        // ... (phần code này đã đúng, không cần thay đổi)
         userRepository.findById(userId).orElseGet(() -> {
             User u = new User();
             u.setId(userId);
@@ -152,6 +164,7 @@ public class PaymentService {
         });
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<String, String> handleIPNCallback(Map<String, String> vnpParams) {
         Map<String, String> response = new HashMap<>();
@@ -185,22 +198,19 @@ public class PaymentService {
                     transaction.setStatus(TransactionStatus.COMPLETED);
                     subscription.setCurrentPeriodStart(Instant.now());
                     subscription.setCurrentPeriodEnd(Instant.now().plus(30, ChronoUnit.DAYS));
-                    log.info("Payment successful for user {}. Preparing to assign VIP role.", subscription.getUser());
-
+                    log.info("Payment successful for user {}. Assign VIP role…", subscription.getUser());
                     try {
                         keycloakAdminService.assignVipRoleToUser(subscription.getUser()).block();
-                        log.info("Successfully assigned VIP role to user {}", subscription.getUser());
+                        log.info("Assigned VIP role to user {}", subscription.getUser());
                     } catch (Exception e) {
-
-                        log.error("CRITICAL: Payment for user {} was successful, but assigning VIP role in Keycloak failed.", subscription.getUser(), e);
+                        log.error("Payment OK but assign VIP role failed for user {}", subscription.getUser(), e);
                     }
-
-
                 } else {
                     transaction.setStatus(TransactionStatus.FAILED);
                     subscription.setStatus(SubscriptionStatus.CANCELLED);
                     subscription.setCancelledAt(Instant.now());
                 }
+
                 transactionRepository.save(transaction);
                 subscriptionRepository.save(subscription);
 
@@ -211,7 +221,7 @@ public class PaymentService {
                 response.put("Message", "Invalid Signature");
             }
         } catch (Exception e) {
-            log.error("An unexpected error occurred in handleIPNCallback", e);
+            log.error("Unexpected error in handleIPNCallback", e);
             response.put("RspCode", "99");
             response.put("Message", "Unknown error");
         }
@@ -219,7 +229,6 @@ public class PaymentService {
     }
 
     private String hmacSHA512(final String key, final String data) {
-
         try {
             if (key == null || data == null) throw new NullPointerException();
             final Mac hmac512 = Mac.getInstance("HmacSHA512");
@@ -235,7 +244,6 @@ public class PaymentService {
     }
 
     private String hashAllFields(Map<String, String> fields) throws UnsupportedEncodingException {
-
         List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
         StringBuilder hashData = new StringBuilder();
@@ -243,7 +251,8 @@ public class PaymentService {
             String fieldName = itr.next();
             String fieldValue = fields.get(fieldName);
             if (fieldValue != null && !fieldValue.isEmpty()) {
-                hashData.append(fieldName).append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
+                hashData.append(fieldName).append('=')
+                        .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
                 if (itr.hasNext()) hashData.append('&');
             }
         }
