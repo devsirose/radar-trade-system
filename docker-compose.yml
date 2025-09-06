@@ -195,6 +195,22 @@ services:
       - ./rts-ml-inference-service/.env.docker
     ports:
       - "8081:8081"
+  sentiment-service:
+    build: ./rts-sentiment-service
+    container_name: sentiment-service
+    ports:
+      - "8087:5000"
+    depends_on:
+      - redis
+      - discovery-server
+      - api-gateway
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
 
 volumes:
   price_service_db_data:

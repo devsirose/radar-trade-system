@@ -12,7 +12,11 @@
     <artifactId>rts-payment-service</artifactId>
 
     <properties>
+        <spring-boot.run.jvmArguments>-Duser.timezone=UTC</spring-boot.run.jvmArguments>
+        <spring-boot.version>3.4.7</spring-boot.version>
+        <postgresql.version>42.7.3</postgresql.version>
     </properties>
+
 
     <dependencies>
         <dependency>
@@ -60,6 +64,13 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.32</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>

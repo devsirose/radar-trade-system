@@ -7,6 +7,21 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+      routes:
+        # Route cho sentiment-service (đã có)
+        - id: sentiment-service-route
+          uri: http://localhost:5000
+          predicates:
+            - Path=/api/v1/news/**
+          filters:
+            - RewritePath=/api/v1/news/(?<segment>.*), /news/$\{segment}
+        - id: ml-inference-service-route
+          uri: http://ml-inference-service:8081
+          predicates:
+            - Path=/api/v1/ml-inference/**
+          filters:
+            - RewritePath=/api/v1/ml-inference/(?<segment>.*), /$\{segment}
+
   security:
     oauth2:
       #      client:

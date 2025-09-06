@@ -2,7 +2,7 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: jdbc:postgresql://localhost:5430/payment-service?sslmode=disable
+    url: jdbc:postgresql://localhost:5430/payment-service?sslmode=disable&currentSchema=public&stringtype=unspecified&TimeZone=Asia/Ho_Chi_Minh
     password: mysecretpassword
     username: root
     driver-class-name: org.postgresql.Driver

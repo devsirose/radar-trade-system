@@ -28,6 +28,11 @@
             <scope>provided</scope>
         </dependency>
         <!-- =============================================== -->
+        <dependency>
+            <groupId>com.radartrade</groupId>
+            <artifactId>rts-api-gateway</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.radartrade</groupId>
